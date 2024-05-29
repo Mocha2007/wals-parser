@@ -12,10 +12,19 @@ namespace WalsParser
 		static void Load(){
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME))
 				Parameter.FromRow(row);
+			Debug(Parameter.parameters.Count());
 			foreach (string row in File.ReadAllLines(LANG_FILENAME))
 				Language.FromRow(row);
+			Debug(Language.languages.Count());
 			foreach (string row in File.ReadAllLines(VALUE_FILENAME))
 				Value.FromRow(row);
+			Debug(Value.values.Count());
+		}
+		public static void Debug(object o){
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.Write("[DEBUG] ");
+			Console.WriteLine(o);
+			Console.ForegroundColor = ConsoleColor.Gray;
 		}
 
 	}
