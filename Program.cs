@@ -19,6 +19,8 @@ namespace WalsParser
 			foreach (string row in File.ReadAllLines(VALUE_FILENAME))
 				Value.FromRow(row);
 			Debug(Value.values.Count());
+			foreach (Region region in Enum.GetValues<Region>())
+				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
 		}
 		public static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -74,6 +76,9 @@ namespace WalsParser
 			double.TryParse(data[7], out longitude);
 			byte.TryParse(data[8], out version);
 			return new Language(pk, jsondata, id, name, description, markup_description, latitude, longitude, version);
+		}
+		public static IEnumerable<Language> GetIn(Region region){
+			return languages.Where(l => l.region == region);
 		}
 	}
 	class Parameter : WalsCSV {
