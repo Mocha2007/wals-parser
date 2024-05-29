@@ -35,21 +35,31 @@ namespace WalsParser
 			Console.ForegroundColor = ConsoleColor.Gray;
 		}
 		static void Test(){
+			Region region = Region.EUROPE;
 			// get all languages in europe...
-			Language[] population = Language.languages.Where(l => l.region == Region.EUROPE).ToArray();
+			foreach(Language l in Language.languages.Where(l => l.region == region))
+				Debug($"${l} is in {region}");
+			// list parameter majorities...
+			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
 			foreach (Parameter p in Parameter.parameters){
 				// find valid values
-				IEnumerable<Value> values = Value.values.Where(v => v.language?.region == Region.EUROPE && v.parameter == p);
-				int sampleSize = values.Count();
-				Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
+				IEnumerable<Value> values = Value.values.Where(v => v.parameter == p && v.language?.region == region);
+				int sampleSize = 0;
+				counts.Clear();
 				foreach(Value v in values){
+					sampleSize++;
 					DomainElement domainElement = v.domainElement;
 					if (counts.ContainsKey(domainElement))
 						counts[domainElement]++;
 					else
 						counts[domainElement] = 1;
 				}
-				DomainElement? majority = counts.Keys.ToList().Find(de => 2 * counts[de] > sampleSize);
+				DomainElement? majority = null;
+				foreach (DomainElement key in counts.Keys)
+					if (2 * counts[key] > sampleSize){
+						majority = key;
+						break;
+					}
 				if (majority is not null)
 					Debug($"{p} => {majority} ({counts[majority]}/{sampleSize})");
 				else
