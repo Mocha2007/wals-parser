@@ -35,8 +35,26 @@ namespace WalsParser
 			Console.ForegroundColor = ConsoleColor.Gray;
 		}
 		static void Test(){
-			foreach (Value parameter in Language.languages[0].parameters)
-				Debug(parameter);
+			// get all languages in europe...
+			Language[] population = Language.languages.Where(l => l.region == Region.EUROPE).ToArray();
+			foreach (Parameter p in Parameter.parameters){
+				// find valid values
+				IEnumerable<Value> values = Value.values.Where(v => v.language?.region == Region.EUROPE && v.parameter == p);
+				int sampleSize = values.Count();
+				Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
+				foreach(Value v in values){
+					DomainElement domainElement = v.domainElement;
+					if (counts.ContainsKey(domainElement))
+						counts[domainElement]++;
+					else
+						counts[domainElement] = 1;
+				}
+				DomainElement? majority = counts.Keys.ToList().Find(de => 2 * counts[de] > sampleSize);
+				if (majority is not null)
+					Debug($"{p} => {majority} ({counts[majority]}/{sampleSize})");
+				else
+					Debug($"{p} => no majority");
+			}
 			Console.ReadKey();
 		}
 
@@ -71,7 +89,7 @@ namespace WalsParser
 				return Value.values.Where(v => v.language == this);
 			}
 		}
-		Region region {
+		public Region region {
 			get {
 				return Geo.FromLatLon(latitude, longitude);
 			}
