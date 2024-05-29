@@ -8,15 +8,16 @@ namespace WalsParser
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
 		static void Main(string[] args){
 			Load();
+			Test();
 		}
 		static void Load(){
-			foreach (string row in File.ReadAllLines(PARAM_FILENAME))
+			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
 				Parameter.FromRow(row);
 			Debug(Parameter.parameters.Count());
-			foreach (string row in File.ReadAllLines(LANG_FILENAME))
+			foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
 				Language.FromRow(row);
 			Debug(Language.languages.Count());
-			foreach (string row in File.ReadAllLines(VALUE_FILENAME))
+			foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
 				Value.FromRow(row);
 			Debug(Value.values.Count());
 			foreach (Region region in Enum.GetValues<Region>())
@@ -28,12 +29,17 @@ namespace WalsParser
 			Console.WriteLine(o);
 			Console.ForegroundColor = ConsoleColor.Gray;
 		}
+		static void Test(){
+			foreach (Value parameter in Language.languages[0].parameters)
+				Debug(parameter);
+			Console.ReadKey();
+		}
 
 	}
 	abstract class WalsCSV {
 		readonly short pk;
 		readonly byte version;
-		readonly string jsondata, id, name, description, markup_description;
+		public readonly string jsondata, id, name, description, markup_description;
 		public WalsCSV(short pk, string jsondata, string id, string name,
 				string description, string markup_description, byte version){
 			this.pk = pk;
@@ -55,10 +61,18 @@ namespace WalsParser
 			this.longitude = longitude;
 			languages.Add(this);
 		}
+		public IEnumerable<Value> parameters {
+			get {
+				return Value.values.Where(v => v.language == this);
+			}
+		}
 		Region region {
 			get {
 				return Geo.FromLatLon(latitude, longitude);
 			}
+		}
+		public override string ToString(){
+			return $"<Language '{id}': {name}>";
 		}
 		public static Language FromRow(string s){
 			string[] data = s.Split(',');
@@ -80,12 +94,18 @@ namespace WalsParser
 		public static IEnumerable<Language> GetIn(Region region){
 			return languages.Where(l => l.region == region);
 		}
+		public static Language? FromID(string id){
+			return languages.Find(l => l.id == id);
+		}
 	}
 	class Parameter : WalsCSV {
 		public static readonly List<Parameter> parameters = new List<Parameter>();
 		Parameter(short pk, string jsondata, string id, string name, string description, string markup_description, byte version)
 				: base(pk, jsondata, id, name, description, markup_description, version){
 			parameters.Add(this);
+		}
+		public override string ToString(){
+			return $"<Parameter '{id}' {name}>";
 		}
 		public static Parameter FromRow(string s){
 			string[] data = s.Split(',');
@@ -101,6 +121,9 @@ namespace WalsParser
 			byte.TryParse(data[6], out version);
 			return new Parameter(pk, jsondata, id, name, description, markup_description, version);
 		}
+		public static Parameter? FromID(string id){
+			return parameters.Find(p => p.id == id);
+		}
 	}
 	class Value : WalsCSV {
 		public static readonly List<Value> values = new List<Value>();
@@ -115,6 +138,29 @@ namespace WalsParser
 			this.frequency = frequency;
 			this.confidence = confidence;
 			values.Add(this);
+		}
+		string id_parameter {
+			get {
+				return id.Split('-')[0];
+			}
+		}
+		string id_language {
+			get {
+				return id.Split('-')[1];
+			}
+		}
+		public Language? language {
+			get {
+				return Language.FromID(id_language);
+			}
+		}
+		public Parameter? parameter {
+			get {
+				return Parameter.FromID(id_parameter);
+			}
+		}
+		public override string ToString(){
+			return $"<Value {language} : '{parameter}' : {valueset_pk}>";
 		}
 		public static Value FromRow(string s){
 			string[] data = s.Split(',');
