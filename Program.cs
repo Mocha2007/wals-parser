@@ -41,9 +41,10 @@ namespace WalsParser
 				Debug($"${l} is in {region}");
 			// list parameter majorities...
 			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
+			List<Value> valuePopulation = Value.values.Where(v => v.language?.region == region).ToList();
 			foreach (Parameter p in Parameter.parameters){
 				// find valid values
-				IEnumerable<Value> values = Value.values.Where(v => v.parameter == p && v.language?.region == region);
+				IEnumerable<Value> values = valuePopulation.Where(v => v.parameter == p);
 				int sampleSize = 0;
 				counts.Clear();
 				foreach(Value v in values){
