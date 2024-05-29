@@ -53,6 +53,11 @@ namespace WalsParser
 			this.longitude = longitude;
 			languages.Add(this);
 		}
+		Region region {
+			get {
+				return Geo.FromLatLon(latitude, longitude);
+			}
+		}
 		public static Language FromRow(string s){
 			string[] data = s.Split(',');
 			short pk;
