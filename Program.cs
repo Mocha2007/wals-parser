@@ -3,6 +3,7 @@
 namespace WalsParser
 {
 	static class Program {
+		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
 		const string LANG_FILENAME = "../wals/raw/language.csv";
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
@@ -13,13 +14,17 @@ namespace WalsParser
 		static void Load(){
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
 				Parameter.FromRow(row);
-			Debug(Parameter.parameters.Count());
+			Debug($"Parameters: {Parameter.parameters.Count()}");
 			foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
 				Language.FromRow(row);
-			Debug(Language.languages.Count());
+			Debug($"Languages: {Language.languages.Count()}");
 			foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
 				Value.FromRow(row);
-			Debug(Value.values.Count());
+			Debug($"Values: {Value.values.Count()}");
+			foreach (string row in File.ReadAllLines(DELEM_FILENAME).Skip(1))
+				DomainElement.FromRow(row);
+			Debug($"Domain Elements: {DomainElement.domainElements.Count()}");
+			// region printing
 			foreach (Region region in Enum.GetValues<Region>())
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
 		}
@@ -37,7 +42,7 @@ namespace WalsParser
 
 	}
 	abstract class WalsCSV {
-		readonly short pk;
+		public readonly short pk;
 		readonly byte version;
 		public readonly string jsondata, id, name, description, markup_description;
 		public WalsCSV(short pk, string jsondata, string id, string name,
@@ -149,6 +154,11 @@ namespace WalsParser
 				return id.Split('-')[1];
 			}
 		}
+		public DomainElement? domainElement {
+			get {
+				return DomainElement.FromID(domainelement_pk);
+			}
+		}
 		public Language? language {
 			get {
 				return Language.FromID(id_language);
@@ -160,7 +170,7 @@ namespace WalsParser
 			}
 		}
 		public override string ToString(){
-			return $"<Value {language} : '{parameter}' : {valueset_pk}>";
+			return $"<Value {language} : '{parameter}' : {domainElement}>";
 		}
 		public static Value FromRow(string s){
 			string[] data = s.Split(',');
@@ -180,6 +190,42 @@ namespace WalsParser
 			byte.TryParse(data[10], out version);
 			return new Value(jsondata, id, name, description, markup_description,
 				pk, valueset_pk, domainelement_pk, frequency, confidence, version);
+		}
+	}
+	class DomainElement : WalsCSV {
+		public static readonly List<DomainElement> domainElements = new List<DomainElement>();
+		readonly short parameter_pk, number;
+		readonly string abbr;
+		DomainElement(short pk, string jsondata, string id, string name, string description,
+				string markup_description, short parameter_pk, short number,
+				string abbr, byte version) : base(pk, jsondata, id, name, description, markup_description, version){
+			this.parameter_pk = parameter_pk;
+			this.number = number;
+			this.abbr = abbr;
+			domainElements.Add(this);
+		}
+		public override string ToString(){
+			return $"<DomainElement {name}>";
+		}
+		public static DomainElement? FromID(short pk){
+			return domainElements.Find(de => de.pk == pk);
+		}
+		public static DomainElement FromRow(string s){
+			string[] data = s.Split(',');
+			short pk, parameter_pk, number;
+			byte version;
+			string abbr, jsondata, id, name, description, markup_description;
+			short.TryParse(data[0], out pk);
+			jsondata = data[1];
+			id = data[2];
+			name = data[3];
+			description = data[4];
+			markup_description = data[5];
+			short.TryParse(data[6], out parameter_pk);
+			short.TryParse(data[7], out number);
+			abbr = data[8];
+			byte.TryParse(data[9], out version);
+			return new DomainElement(pk, jsondata, id, name, description, markup_description, parameter_pk, number, abbr, version);
 		}
 	}
 }
