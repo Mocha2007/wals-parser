@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace WalsParser
 {
@@ -42,7 +43,7 @@ namespace WalsParser
 			// list parameter majorities...
 			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
 			List<Value> valuePopulation = Value.values.Where(v => v.language?.region == region).ToList();
-			foreach (Parameter p in Parameter.parameters){
+			foreach (Parameter p in Parameter.parameters.OrderBy(p => p.order)){
 				// find valid values
 				IEnumerable<Value> values = valuePopulation.Where(v => v.parameter == p);
 				int sampleSize = 0;
@@ -137,6 +138,15 @@ namespace WalsParser
 		Parameter(short pk, string jsondata, string id, string name, string description, string markup_description, byte version)
 				: base(pk, jsondata, id, name, description, markup_description, version){
 			parameters.Add(this);
+		}
+		public int order {
+			get {
+				string[] halves = Regex.Split(id, "(?=[A-Z])");
+				byte n;
+				byte.TryParse(halves[0], out n);
+				byte m = (byte)halves[1][0];
+				return (n << 8) + m;
+			}
 		}
 		public override string ToString(){
 			return $"<Parameter '{id}' {name}>";
