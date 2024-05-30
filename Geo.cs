@@ -2,7 +2,7 @@ using System.Drawing;
 
 namespace WalsParser {
 
-	enum Region : uint {
+	enum Province : uint {
 		EUROPE = 0xFFFFFFFF,
 		CAUCASUS = 0xFF000000,
 		SIBERIA = 0xFF404040,
@@ -22,15 +22,38 @@ namespace WalsParser {
 		NEW_GUINEA = 0xFFFF8080,
 		AUSTRALIA = 0xFFFFC0FF,
 	}
+	class Region {
+		public static readonly List<Region> regions = new();
+		readonly string id;
+		public readonly Province[] constituents;
+		public Region(string id, Province[] constituents){
+			this.id = id;
+			this.constituents = constituents;
+			regions.Add(this);
+		}
+		public override string ToString(){
+			return $"<Region {id}>";
+		}
+		public static Region? FromID(string id){
+			return regions.Find(r => r.id == id);
+		}
+		static readonly Region AFRICA = new("africa", new Province[]{Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN});
+		static readonly Region AMERICA_NORTH = new("america_north", new Province[]{Province.AMERICA_NORTH_NORTH, Province.CARRIBEAN, Province.AMERICA_CENTRAL});
+		static readonly Region AMERICA_SOUTH = new("america_south", new Province[]{Province.AMERICA_SOUTH});
+		static readonly Region ASIA = new("asia", new Province[]{Province.SIBERIA, Province.CAUCASUS, Province.ASIA_SOUTHWEST,
+			Province.ASIA_CENTRAL, Province.INDIA, Province.ASIA_EAST, Province.INDOCHINA, Province.INDONESIA});
+		static readonly Region EUROPE = new("europe", new Province[]{Province.EUROPE});
+		static readonly Region OCEANIA = new("oceania", new Province[]{Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA});
+	}
 	static class Geo {
 		const string MAP_FILENAME = "regions.png";
-		static readonly Bitmap map = new Bitmap(MAP_FILENAME);
+		static readonly Bitmap map = new(MAP_FILENAME);
 		static readonly int height = map.Height;
 		static readonly int width = map.Width;
-		public static Region FromLatLon(double lat, double lon){
+		public static Province FromLatLon(double lat, double lon){
 			Tuple<int, int> coords = LatLonToXY(lat, lon);
 			uint answer = (uint)map.GetPixel(coords.Item1, coords.Item2).ToArgb();
-			return (Region)answer;
+			return (Province)answer;
 		}
 		static Tuple<int, int> LatLonToXY(double lat, double lon){
 			int x = (int)((lon + 180)/360 * width);

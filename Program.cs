@@ -4,7 +4,8 @@ namespace WalsParser
 {
 	static class Program {
 		const string test_lang_id = "eng"; // English
-		const Region region = Region.EUROPE;
+		const string region_id = "europe";
+		static readonly Region region = Region.FromID(region_id) ?? Region.regions[0];
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
 		const string LANG_FILENAME = "../wals/raw/language.csv";
@@ -28,6 +29,10 @@ namespace WalsParser
 			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
 		}
 		static void Load(){
+			// create a new region for each province
+			foreach (Province province in Enum.GetValues<Province>())
+				new Region(province.ToString(), new Province[]{province});
+			// load files
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
 				Parameter.FromRow(row);
 			Debug($"Parameters: {Parameter.parameters.Count()}");
@@ -41,7 +46,7 @@ namespace WalsParser
 				DomainElement.FromRow(row);
 			Debug($"Domain Elements: {DomainElement.domainElements.Count()}");
 			// region printing
-			foreach (Region region in Enum.GetValues<Region>())
+			foreach (Region region in Region.regions)
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
 		}
 		static void TestRegion(){
@@ -50,7 +55,9 @@ namespace WalsParser
 			// 	Debug($"${l} is in {region}");
 			// list parameter majorities...
 			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
-			List<Value> valuePopulation = Value.values.Where(v => v.language?.region == region).ToList();
+			List<Value> valuePopulation = Value.values
+				.Where(v => v.language is not null && region.constituents.Contains(v.language.province))
+				.ToList();
 			foreach (Parameter p in Parameter.parameters.OrderBy(p => p.order)){
 				// find valid values
 				IEnumerable<Value> values = valuePopulation.Where(v => v.id_parameter == p.id);
@@ -83,7 +90,7 @@ namespace WalsParser
 			List<Tuple<Language, double>> distances = new List<Tuple<Language, double>>();
 			int i = 0;
 			long t_start = Time();
-			Language[] population = Language.languages.Where(l => l.region == region).ToArray();
+			Language[] population = Language.languages.Where(l => region.constituents.Contains(l.province)).ToArray();
 			foreach (Language l in population){
 				Tuple<Language, double> t = new Tuple<Language, double>(l, ref_lang.Distance(l));
 				distances.Add(t);
@@ -125,7 +132,7 @@ namespace WalsParser
 				return Value.values.Where(v => v.id_language == id);
 			}
 		}
-		public Region region {
+		public Province province {
 			get {
 				return Geo.FromLatLon(latitude, longitude);
 			}
@@ -170,7 +177,7 @@ namespace WalsParser
 			return new Language(pk, jsondata, id, name, description, markup_description, latitude, longitude, version);
 		}
 		public static IEnumerable<Language> GetIn(Region region){
-			return languages.Where(l => l.region == region);
+			return languages.Where(l => region.constituents.Contains(l.province));
 		}
 		public static Language? FromID(string id){
 			return languages.Find(l => l.id == id);
