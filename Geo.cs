@@ -28,6 +28,7 @@ namespace WalsParser {
 		AUSTRALIA = 0xFFFFC0FF,
 		MESOAMERICA = 0xFF400080,
 		AMAZON = 0xFF804080,
+		AMERICA_SOUTHWEST = 0xFF804080,
 	}
 	class Region {
 		public static readonly List<Region> regions = new();
@@ -49,7 +50,7 @@ namespace WalsParser {
 		});
 		static readonly Region AMERICA_NORTH = new("AMERICA_NORTH", new Province[]{
 			Province.AMERICA_NORTH_NORTH, Province.CASCADIA, Province.CARRIBEAN, Province.AMERICA_CENTRAL_PERIPHERAL,
-			Province.PLAINS, Province.MESOAMERICA
+			Province.PLAINS, Province.MESOAMERICA, Province.AMERICA_SOUTHWEST
 		});
 		static readonly Region AMERICA_CENTRAL = new("AMERICA_CENTRAL", new Province[]{
 			Province.AMERICA_CENTRAL_PERIPHERAL, Province.MESOAMERICA
