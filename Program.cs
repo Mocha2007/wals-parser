@@ -81,11 +81,12 @@ namespace WalsParser
 			List<Tuple<Language, double>> distances = new List<Tuple<Language, double>>();
 			int i = 0;
 			long t_start = Time();
-			foreach (Language l in Language.languages){
+			Language[] population = Language.languages.Where(l => l.region == region).ToArray();
+			foreach (Language l in population){
 				Tuple<Language, double> t = new Tuple<Language, double>(l, ref_lang.Distance(l));
 				distances.Add(t);
 				// ETA
-				Debug($"{++i}/{Language.languages.Count} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/Language.languages.Count))} s");
+				Debug($"{++i}/{population.Length} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/population.Length))} s");
 			}
 			foreach (Tuple<Language, double> t in distances.OrderBy(xy => -xy.Item2))
 				Debug($"{t.Item1} => {t.Item2}");
