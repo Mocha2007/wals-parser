@@ -13,6 +13,7 @@ namespace WalsParser
 		static void Main(string[] args){
 			Load();
 			TestRegion();
+			// TestLangDist();
 			// await input
 			Console.ReadLine();
 		}
@@ -33,6 +34,8 @@ namespace WalsParser
 			// create a new region for each province
 			foreach (Province province in Enum.GetValues<Province>())
 				new Region(province.ToString(), new Province[]{province});
+			// create a new region with EVERY province
+			new Region("earth", Enum.GetValues<Province>());
 			// load files
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
 				Parameter.FromRow(row);
@@ -58,7 +61,10 @@ namespace WalsParser
 			// list parameter majorities...
 			Dictionary<short, int> counts = new Dictionary<short, int>();
 			List<Value> valuePopulation = Value.values
-				.Where(v => v.language is not null && region.constituents.Contains(v.language.province))
+				.Where(v => {
+					Language? l = v.language;
+					return l is not null && region.constituents.Contains(l.province);
+				})
 				.ToList();
 			foreach (Parameter p in Parameter.parameters.OrderBy(p => p.order)){
 				// find valid values
@@ -122,6 +128,7 @@ namespace WalsParser
 		public static readonly List<Language> languages = new List<Language>();
 		static readonly Dictionary<string, Language?> cache = new();
 		readonly double latitude, longitude;
+		Value[]? valueCache;
 		Language(short pk, string jsondata, string id, string name,
 				string description, string markup_description, double latitude,
 				double longitude, byte version) : base(pk, jsondata, id, name, description, markup_description, version){
@@ -129,9 +136,9 @@ namespace WalsParser
 			this.longitude = longitude;
 			languages.Add(this);
 		}
-		public IEnumerable<Value> values {
+		public Value[] values {
 			get {
-				return Value.values.Where(v => v.id_language == id);
+				return valueCache ??= Value.values.Where(v => v.id_language == id).ToArray();
 			}
 		}
 		public Province province {
@@ -140,8 +147,8 @@ namespace WalsParser
 			}
 		}
 		public double Distance(Language other){
-			Value[] values0 = values.ToArray();
-			Value[] values1 = other.values.ToArray();
+			Value[] values0 = values;
+			Value[] values1 = other.values;
 			// iterate over smaller array cause it's faster
 			Value[] v_min = values0.Length < values1.Length ? values0 : values1;
 			Value[] v_max = values0.Length < values1.Length ? values1 : values0;
