@@ -11,7 +11,9 @@ namespace WalsParser
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
 		static void Main(string[] args){
 			Load();
-			TestLangDist();
+			TestRegion();
+			// await input
+			Console.ReadLine();
 		}
 		public static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -90,8 +92,6 @@ namespace WalsParser
 			}
 			foreach (Tuple<Language, double> t in distances.OrderBy(xy => -xy.Item2))
 				Debug($"{t.Item1} => {t.Item2}");
-			// await input
-			Console.ReadLine();
 		}
 
 	}
