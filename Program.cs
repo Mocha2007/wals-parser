@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace WalsParser
 {
@@ -32,8 +31,8 @@ namespace WalsParser
 		public static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write("[DEBUG] ");
-			Console.WriteLine(o);
 			Console.ForegroundColor = ConsoleColor.Gray;
+			Console.WriteLine(o);
 		}
 		static void Test(){
 			Region region = Region.EUROPE;
@@ -149,7 +148,7 @@ namespace WalsParser
 			}
 		}
 		public override string ToString(){
-			return $"<Parameter '{id}' {name}>";
+			return $"<Feature {id}: {name}>";
 		}
 		public static Parameter FromRow(string s){
 			string[] data = s.Split(',');
@@ -244,7 +243,7 @@ namespace WalsParser
 			domainElements.Add(this);
 		}
 		public override string ToString(){
-			return $"<DomainElement {name}>";
+			return $"<{name}>";
 		}
 		public static DomainElement? FromID(short pk){
 			return domainElements.Find(de => de.pk == pk);
