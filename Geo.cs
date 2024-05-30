@@ -18,6 +18,7 @@ namespace WalsParser {
 		AFRICA_SUBSAHARAN = 0xFF008000,
 		INDONESIA = 0xFF00C080,
 		AMERICA_NORTH_NORTH = 0xFFFF0000,
+		PLAINS = 0xFFC080FF,
 		AMERICA_CENTRAL = 0xFF00FFFF,
 		AMERICA_SOUTH = 0xFFFF8000,
 		CASCADIA = 0xFFC0FFC0,
@@ -45,7 +46,8 @@ namespace WalsParser {
 			Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN
 		});
 		static readonly Region AMERICA_NORTH = new("AMERICA_NORTH", new Province[]{
-			Province.AMERICA_NORTH_NORTH, Province.CASCADIA, Province.CARRIBEAN, Province.AMERICA_CENTRAL
+			Province.AMERICA_NORTH_NORTH, Province.CASCADIA, Province.CARRIBEAN, Province.AMERICA_CENTRAL,
+			Province.PLAINS
 		});
 		// static readonly Region AMERICA_SOUTH = new("AMERICA_SOUTH", new Province[]{Province.AMERICA_SOUTH});
 		static readonly Region ASIA = new("ASIA", new Province[]{
