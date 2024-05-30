@@ -4,18 +4,28 @@ namespace WalsParser
 {
 	static class Program {
 		const string test_lang_id = "eng"; // English
-		const string region_id = "EUROPE";
-		static readonly Region region = Region.FromID(region_id) ?? Region.regions[0];
+		const string region_id = "EARTH";
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
 		const string LANG_FILENAME = "../wals/raw/language.csv";
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
+		static readonly Dictionary<string, Action<string>> arg_actions = new Dictionary<string, Action<string>>(){
+			{"dist", TestLangDist},
+			{"sprachbund", TestRegion},
+		};
 		static void Main(string[] args){
 			Load();
-			TestRegion();
+			// TestRegion();
 			// TestLangDist();
+			ParseArgs(args, arg_actions);
 			// await input
 			Console.ReadLine();
+		}
+		static void ParseArgs(string[] args, Dictionary<string, Action<string>> actions){
+			for (int i = 0; i < args.Length; i++){
+				if (actions.ContainsKey(args[i]))
+					actions[args[i]](args[++i]);
+			}
 		}
 		public static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -35,7 +45,7 @@ namespace WalsParser
 			foreach (Province province in Enum.GetValues<Province>())
 				new Region(province.ToString(), new Province[]{province});
 			// create a new region with EVERY province
-			new Region("earth", Enum.GetValues<Province>());
+			Region.EARTH = new Region("EARTH", Enum.GetValues<Province>());
 			// load files
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
 				Parameter.FromRow(row);
@@ -54,10 +64,8 @@ namespace WalsParser
 			foreach (Region region in Region.regions)
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
 		}
-		static void TestRegion(){
-			// get all languages in europe...
-			// foreach(Language l in Language.languages.Where(l => l.region == region))
-			// 	Debug($"${l} is in {region}");
+		static void TestRegion(string id = region_id){
+			Region region = Region.FromID(id) ?? Region.regions[0];
 			// list parameter majorities...
 			Dictionary<short, int> counts = new Dictionary<short, int>();
 			List<Value> valuePopulation = Value.values
@@ -90,16 +98,16 @@ namespace WalsParser
 					Debug($"{p} => no majority");
 			}
 		}
-		static void TestLangDist(){
+		static void TestLangDist(string id = test_lang_id){
 			Debug("Testing lang dist...");
 			// list lang distances from english
-			Language ref_lang = Language.FromID(test_lang_id) ?? Language.languages[0];
-			List<Tuple<Language, double>> distances = new List<Tuple<Language, double>>();
+			Language ref_lang = Language.FromID(id) ?? Language.languages[0];
+			List<Tuple<Language, double>> distances = new();
 			int i = 0;
 			long t_start = Time();
-			Language[] population = Language.languages.Where(l => region.constituents.Contains(l.province)).ToArray();
+			Language[] population = Language.languages.Where(l => Region.EARTH.constituents.Contains(l.province)).ToArray();
 			foreach (Language l in population){
-				Tuple<Language, double> t = new Tuple<Language, double>(l, ref_lang.Distance(l));
+				Tuple<Language, double> t = new(l, ref_lang.Distance(l));
 				distances.Add(t);
 				// ETA
 				Debug($"{++i}/{population.Length} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/population.Length)/1000)} s");

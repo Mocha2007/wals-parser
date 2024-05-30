@@ -58,6 +58,7 @@ namespace WalsParser {
 		static readonly Region OCEANIA = new("OCEANIA", new Province[]{
 			Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA
 		});
+		public static Region EARTH = regions[0]; // placeholder
 	}
 	static class Geo {
 		const string MAP_FILENAME = "regions.png";
