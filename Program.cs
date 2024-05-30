@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace WalsParser
 {
@@ -313,6 +314,14 @@ namespace WalsParser
 			this.number = number;
 			this.abbr = abbr;
 			domainElements.Add(this);
+		}
+		Tuple<char, Color> icon {
+			get {
+				string s = Regex.Match(jsondata, "(?<= \"\").+?(?=\"\")").Value;
+				char c = s[0];
+				Color color = ColorTranslator.FromHtml(s[1..]);
+				return new(c, color);
+			}
 		}
 		public override string ToString(){
 			return $"<{name}>";
