@@ -22,45 +22,31 @@ namespace WalsParser
 			Console.ForegroundColor = ConsoleColor.Gray;
 			Console.WriteLine(o);
 		}
-		static double ETA(long elapsed_seconds, double completion){
-			return elapsed_seconds / completion - elapsed_seconds;
+		static double ETA(long elapsed_ms, double completion){
+			return elapsed_ms / completion - elapsed_ms;
 		}
 		static long Time(){
-			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
+			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
 		}
 		static void Load(){
-			static void CreateProvRegions(){
-				// create a new region for each province
-				foreach (Province province in Enum.GetValues<Province>())
-					new Region(province.ToString(), new Province[]{province});
-			}
+			// long t_start = Time();
+			// create a new region for each province
+			foreach (Province province in Enum.GetValues<Province>())
+				new Region(province.ToString(), new Province[]{province});
 			// load files
-			static void LoadParameters(){
-				foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
-					Parameter.FromRow(row);
-			}
-			static void LoadLanguages(){
-				foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
-					Language.FromRow(row);
-			}
-			static void LoadValues(){
-				foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
-					Value.FromRow(row);
-			}
-			static void LoadDelems(){
-				foreach (string row in File.ReadAllLines(DELEM_FILENAME).Skip(1))
-					DomainElement.FromRow(row);
-			}
-			// these can run in parallel; none rely on each other
-			Action[] actions = new Action[]{CreateProvRegions, LoadParameters, LoadLanguages, LoadValues, LoadDelems};
-			List<Task> tasks = new();
-			foreach (Action a in actions)
-				tasks.Add(Task.Factory.StartNew(a));
-			Task.WaitAll(tasks.ToArray());
+			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
+				Parameter.FromRow(row);
 			Debug($"Parameters: {Parameter.parameters.Count}");
+			foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
+				Language.FromRow(row);
 			Debug($"Languages: {Language.languages.Count}");
+			foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
+				Value.FromRow(row);
 			Debug($"Values: {Value.values.Count}");
+			foreach (string row in File.ReadAllLines(DELEM_FILENAME).Skip(1))
+				DomainElement.FromRow(row);
 			Debug($"Domain Elements: {DomainElement.domainElements.Count}");
+			// Debug($"{Time() - t_start} ms");
 			// region printing
 			foreach (Region region in Region.regions)
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
@@ -110,7 +96,7 @@ namespace WalsParser
 				Tuple<Language, double> t = new Tuple<Language, double>(l, ref_lang.Distance(l));
 				distances.Add(t);
 				// ETA
-				Debug($"{++i}/{population.Length} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/population.Length))} s");
+				Debug($"{++i}/{population.Length} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/population.Length)/1000)} s");
 			}
 			foreach (Tuple<Language, double> t in distances.OrderBy(xy => -xy.Item2))
 				Debug($"{t.Item1} => {t.Item2}");
