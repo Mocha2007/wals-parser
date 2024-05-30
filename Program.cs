@@ -4,7 +4,7 @@ namespace WalsParser
 {
 	static class Program {
 		const string test_lang_id = "eng"; // English
-		const string region_id = "CASCADIA";
+		const string region_id = "europe";
 		static readonly Region region = Region.FromID(region_id) ?? Region.regions[0];
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
@@ -81,10 +81,10 @@ namespace WalsParser
 				counts.Clear();
 				foreach(Value v in values){
 					sampleSize++;
-					if (counts.Keys.Any(key => key == v.domainelement_pk))
-						counts[v.pk]++;
+					if (counts.ContainsKey(v.domainelement_pk))
+						counts[v.domainelement_pk]++;
 					else
-						counts[v.pk] = 1;
+						counts[v.domainelement_pk] = 1;
 				}
 				short majority_domainelement_pk = -1;
 				foreach (short domainelement_pk in counts.Keys)
