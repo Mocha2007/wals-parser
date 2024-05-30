@@ -4,7 +4,7 @@ namespace WalsParser
 {
 	static class Program {
 		const string test_lang_id = "eng"; // English
-		const string region_id = "europe";
+		const string region_id = "EUROPE";
 		static readonly Region region = Region.FromID(region_id) ?? Region.regions[0];
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";

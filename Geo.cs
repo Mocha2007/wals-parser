@@ -3,7 +3,10 @@ using System.Drawing;
 namespace WalsParser {
 
 	enum Province : uint {
-		EUROPE = 0xFFFFFFFF,
+		EUROPE_EAST = 0xFFFFFFFF,
+		BALKANS = 0xFFFF80C0,
+		EUROPE_WEST = 0xFFC0FF80,
+		EUROPE_NORTH = 0xFF80C0FF,
 		CAUCASUS = 0xFF000000,
 		SIBERIA = 0xFF404040,
 		ASIA_CENTRAL = 0xFF808080,
@@ -38,19 +41,21 @@ namespace WalsParser {
 		public static Region? FromID(string id){
 			return regions.Find(r => r.id == id);
 		}
-		static readonly Region AFRICA = new("africa", new Province[]{
+		static readonly Region AFRICA = new("AFRICA", new Province[]{
 			Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN
 		});
-		static readonly Region AMERICA_NORTH = new("america_north", new Province[]{
+		static readonly Region AMERICA_NORTH = new("AMERICA_NORTH", new Province[]{
 			Province.AMERICA_NORTH_NORTH, Province.CASCADIA, Province.CARRIBEAN, Province.AMERICA_CENTRAL
 		});
-		static readonly Region AMERICA_SOUTH = new("america_south", new Province[]{Province.AMERICA_SOUTH});
-		static readonly Region ASIA = new("asia", new Province[]{
+		// static readonly Region AMERICA_SOUTH = new("AMERICA_SOUTH", new Province[]{Province.AMERICA_SOUTH});
+		static readonly Region ASIA = new("ASIA", new Province[]{
 			Province.SIBERIA, Province.CAUCASUS, Province.ASIA_SOUTHWEST,
 			Province.ASIA_CENTRAL, Province.INDIA, Province.ASIA_EAST, Province.INDOCHINA, Province.INDONESIA
 		});
-		static readonly Region EUROPE = new("europe", new Province[]{Province.EUROPE});
-		static readonly Region OCEANIA = new("oceania", new Province[]{
+		static readonly Region EUROPE = new("EUROPE", new Province[]{
+			Province.EUROPE_EAST, Province.EUROPE_NORTH, Province.EUROPE_WEST, Province.BALKANS
+		});
+		static readonly Region OCEANIA = new("OCEANIA", new Province[]{
 			Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA
 		});
 	}
