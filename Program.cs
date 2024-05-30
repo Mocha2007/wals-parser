@@ -3,14 +3,27 @@
 namespace WalsParser
 {
 	static class Program {
-		static readonly Region region = Region.EUROPE;
+		const string test_lang_id = "eng"; // English
+		const Region region = Region.EUROPE;
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
 		const string LANG_FILENAME = "../wals/raw/language.csv";
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
 		static void Main(string[] args){
 			Load();
-			Test();
+			TestLangDist();
+		}
+		public static void Debug(object o){
+			Console.ForegroundColor = ConsoleColor.DarkYellow;
+			Console.Write("[DEBUG] ");
+			Console.ForegroundColor = ConsoleColor.Gray;
+			Console.WriteLine(o);
+		}
+		static double ETA(long elapsed_seconds, double completion){
+			return elapsed_seconds / completion - elapsed_seconds;
+		}
+		static long Time(){
+			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
 		}
 		static void Load(){
 			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
@@ -29,13 +42,7 @@ namespace WalsParser
 			foreach (Region region in Enum.GetValues<Region>())
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
 		}
-		public static void Debug(object o){
-			Console.ForegroundColor = ConsoleColor.DarkYellow;
-			Console.Write("[DEBUG] ");
-			Console.ForegroundColor = ConsoleColor.Gray;
-			Console.WriteLine(o);
-		}
-		static void Test(){
+		static void TestRegion(){
 			// get all languages in europe...
 			// foreach(Language l in Language.languages.Where(l => l.region == region))
 			// 	Debug($"${l} is in {region}");
@@ -44,7 +51,7 @@ namespace WalsParser
 			List<Value> valuePopulation = Value.values.Where(v => v.language?.region == region).ToList();
 			foreach (Parameter p in Parameter.parameters.OrderBy(p => p.order)){
 				// find valid values
-				IEnumerable<Value> values = valuePopulation.Where(v => v.parameter == p);
+				IEnumerable<Value> values = valuePopulation.Where(v => v.id_parameter == p.id);
 				int sampleSize = 0;
 				counts.Clear();
 				foreach(Value v in values){
@@ -66,7 +73,24 @@ namespace WalsParser
 				else
 					Debug($"{p} => no majority");
 			}
-			Console.ReadKey();
+		}
+		static void TestLangDist(){
+			Debug("Testing lang dist...");
+			// list lang distances from english
+			Language ref_lang = Language.FromID(test_lang_id) ?? Language.languages[0];
+			List<Tuple<Language, double>> distances = new List<Tuple<Language, double>>();
+			int i = 0;
+			long t_start = Time();
+			foreach (Language l in Language.languages){
+				Tuple<Language, double> t = new Tuple<Language, double>(l, ref_lang.Distance(l));
+				distances.Add(t);
+				// ETA
+				Debug($"{++i}/{Language.languages.Count} done; ETA = {Math.Round(ETA(Time() - t_start, (double)i/Language.languages.Count))} s");
+			}
+			foreach (Tuple<Language, double> t in distances.OrderBy(xy => -xy.Item2))
+				Debug($"{t.Item1} => {t.Item2}");
+			// await input
+			Console.ReadLine();
 		}
 
 	}
@@ -95,15 +119,34 @@ namespace WalsParser
 			this.longitude = longitude;
 			languages.Add(this);
 		}
-		public IEnumerable<Value> parameters {
+		public IEnumerable<Value> values {
 			get {
-				return Value.values.Where(v => v.language == this);
+				return Value.values.Where(v => v.id_language == id);
 			}
 		}
 		public Region region {
 			get {
 				return Geo.FromLatLon(latitude, longitude);
 			}
+		}
+		public double Distance(Language other){
+			Value[] values0 = values.ToArray();
+			Value[] values1 = other.values.ToArray();
+			// iterate over smaller array cause it's faster
+			Value[] v_min = values0.Length < values1.Length ? values0 : values1;
+			Value[] v_max = values0.Length < values1.Length ? values1 : values0;
+			int matches = 0;
+			int total = 0;
+			foreach (Value v in v_min){
+				try {
+					Value v_ = v_max.First(v2 => v2.id_parameter == v.id_parameter);
+					if (v.domainelement_pk == v_.domainelement_pk)
+						matches++;
+					total++;
+				}
+				catch (InvalidOperationException){}
+			}
+			return 0 < total ? (double)matches / total : 0;
 		}
 		public override string ToString(){
 			return $"<Language '{id}': {name}>";
@@ -170,7 +213,7 @@ namespace WalsParser
 	}
 	class Value : WalsCSV {
 		public static readonly List<Value> values = new List<Value>();
-		readonly short valueset_pk, domainelement_pk;
+		public readonly short valueset_pk, domainelement_pk;
 		readonly string frequency, confidence;
 		Value(string jsondata, string id, string name, string description,
 				string markup_description, short pk, short valueset_pk,
@@ -182,12 +225,12 @@ namespace WalsParser
 			this.confidence = confidence;
 			values.Add(this);
 		}
-		string id_parameter {
+		public string id_parameter {
 			get {
 				return id.Split('-')[0];
 			}
 		}
-		string id_language {
+		public string id_language {
 			get {
 				return id.Split('-')[1];
 			}
