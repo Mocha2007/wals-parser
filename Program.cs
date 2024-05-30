@@ -70,7 +70,7 @@ namespace WalsParser
 			// foreach(Language l in Language.languages.Where(l => l.region == region))
 			// 	Debug($"${l} is in {region}");
 			// list parameter majorities...
-			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
+			Dictionary<short, int> counts = new Dictionary<short, int>();
 			List<Value> valuePopulation = Value.values
 				.Where(v => v.language is not null && region.constituents.Contains(v.language.province))
 				.ToList();
@@ -81,20 +81,19 @@ namespace WalsParser
 				counts.Clear();
 				foreach(Value v in values){
 					sampleSize++;
-					DomainElement domainElement = v.domainElement;
-					if (counts.ContainsKey(domainElement))
-						counts[domainElement]++;
+					if (counts.Keys.Any(key => key == v.domainelement_pk))
+						counts[v.pk]++;
 					else
-						counts[domainElement] = 1;
+						counts[v.pk] = 1;
 				}
-				DomainElement? majority = null;
-				foreach (DomainElement key in counts.Keys)
-					if (2 * counts[key] > sampleSize){
-						majority = key;
+				short majority_domainelement_pk = -1;
+				foreach (short domainelement_pk in counts.Keys)
+					if (2 * counts[domainelement_pk] > sampleSize){
+						majority_domainelement_pk = domainelement_pk;
 						break;
 					}
-				if (majority is not null)
-					Debug($"{p} => {majority} ({counts[majority]}/{sampleSize})");
+				if (0 <= majority_domainelement_pk)
+					Debug($"{p} => {DomainElement.FromID(majority_domainelement_pk)} ({counts[majority_domainelement_pk]}/{sampleSize})");
 				else
 					Debug($"{p} => no majority");
 			}
