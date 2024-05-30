@@ -29,22 +29,38 @@ namespace WalsParser
 			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
 		}
 		static void Load(){
-			// create a new region for each province
-			foreach (Province province in Enum.GetValues<Province>())
-				new Region(province.ToString(), new Province[]{province});
+			static void CreateProvRegions(){
+				// create a new region for each province
+				foreach (Province province in Enum.GetValues<Province>())
+					new Region(province.ToString(), new Province[]{province});
+			}
 			// load files
-			foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
-				Parameter.FromRow(row);
-			Debug($"Parameters: {Parameter.parameters.Count()}");
-			foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
-				Language.FromRow(row);
-			Debug($"Languages: {Language.languages.Count()}");
-			foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
-				Value.FromRow(row);
-			Debug($"Values: {Value.values.Count()}");
-			foreach (string row in File.ReadAllLines(DELEM_FILENAME).Skip(1))
-				DomainElement.FromRow(row);
-			Debug($"Domain Elements: {DomainElement.domainElements.Count()}");
+			static void LoadParameters(){
+				foreach (string row in File.ReadAllLines(PARAM_FILENAME).Skip(1))
+					Parameter.FromRow(row);
+			}
+			static void LoadLanguages(){
+				foreach (string row in File.ReadAllLines(LANG_FILENAME).Skip(1))
+					Language.FromRow(row);
+			}
+			static void LoadValues(){
+				foreach (string row in File.ReadAllLines(VALUE_FILENAME).Skip(1))
+					Value.FromRow(row);
+			}
+			static void LoadDelems(){
+				foreach (string row in File.ReadAllLines(DELEM_FILENAME).Skip(1))
+					DomainElement.FromRow(row);
+			}
+			// these can run in parallel; none rely on each other
+			Action[] actions = new Action[]{CreateProvRegions, LoadParameters, LoadLanguages, LoadValues, LoadDelems};
+			List<Task> tasks = new();
+			foreach (Action a in actions)
+				tasks.Add(Task.Factory.StartNew(a));
+			Task.WaitAll(tasks.ToArray());
+			Debug($"Parameters: {Parameter.parameters.Count}");
+			Debug($"Languages: {Language.languages.Count}");
+			Debug($"Values: {Value.values.Count}");
+			Debug($"Domain Elements: {DomainElement.domainElements.Count}");
 			// region printing
 			foreach (Region region in Region.regions)
 				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
