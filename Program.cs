@@ -120,6 +120,7 @@ namespace WalsParser
 	}
 	class Language : WalsCSV {
 		public static readonly List<Language> languages = new List<Language>();
+		static readonly Dictionary<string, Language?> cache = new();
 		readonly double latitude, longitude;
 		Language(short pk, string jsondata, string id, string name,
 				string description, string markup_description, double latitude,
@@ -181,7 +182,9 @@ namespace WalsParser
 			return languages.Where(l => region.constituents.Contains(l.province));
 		}
 		public static Language? FromID(string id){
-			return languages.Find(l => l.id == id);
+			if (cache.ContainsKey(id))
+				return cache[id];
+			return cache[id] = languages.Find(l => l.id == id);
 		}
 	}
 	class Parameter : WalsCSV {
