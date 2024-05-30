@@ -3,6 +3,7 @@
 namespace WalsParser
 {
 	static class Program {
+		static readonly Region region = Region.EUROPE;
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
 		const string PARAM_FILENAME = "../wals/raw/parameter.csv";
 		const string LANG_FILENAME = "../wals/raw/language.csv";
@@ -35,7 +36,6 @@ namespace WalsParser
 			Console.WriteLine(o);
 		}
 		static void Test(){
-			Region region = Region.EUROPE;
 			// get all languages in europe...
 			// foreach(Language l in Language.languages.Where(l => l.region == region))
 			// 	Debug($"${l} is in {region}");
