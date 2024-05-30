@@ -3,6 +3,8 @@
 namespace WalsParser
 {
 	static class Program {
+		// https://stackoverflow.com/a/18147076
+		public const string CSV_SPLIT_REGEX = "(?:^|,)(?=[^\"]|(\")?)\"?((?(1)(?:[^\"]|\"\")*|[^,\"]*))\"?(?=,|$)";
 		const string test_lang_id = "eng"; // English
 		const string region_id = "EARTH";
 		const string DELEM_FILENAME = "../wals/raw/domainelement.csv";
@@ -319,7 +321,7 @@ namespace WalsParser
 			return domainElements.Find(de => de.pk == pk);
 		}
 		public static DomainElement FromRow(string s){
-			string[] data = s.Split(',');
+			string[] data = Regex.Matches(s, Program.CSV_SPLIT_REGEX).Select(match => match.Groups[2].Value).ToArray();
 			short pk, parameter_pk, number;
 			byte version;
 			string abbr, jsondata, id, name, description, markup_description;
