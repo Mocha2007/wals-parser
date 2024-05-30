@@ -37,8 +37,8 @@ namespace WalsParser
 		static void Test(){
 			Region region = Region.EUROPE;
 			// get all languages in europe...
-			foreach(Language l in Language.languages.Where(l => l.region == region))
-				Debug($"${l} is in {region}");
+			// foreach(Language l in Language.languages.Where(l => l.region == region))
+			// 	Debug($"${l} is in {region}");
 			// list parameter majorities...
 			Dictionary<DomainElement, int> counts = new Dictionary<DomainElement, int>();
 			List<Value> valuePopulation = Value.values.Where(v => v.language?.region == region).ToList();
