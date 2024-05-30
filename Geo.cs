@@ -17,6 +17,7 @@ namespace WalsParser {
 		AMERICA_NORTH_NORTH = 0xFFFF0000,
 		AMERICA_CENTRAL = 0xFF00FFFF,
 		AMERICA_SOUTH = 0xFFFF8000,
+		CASCADIA = 0xFFC0FFC0,
 		CARRIBEAN = 0xFF80FF00,
 		OCEANIA = 0xFFFFC080,
 		NEW_GUINEA = 0xFFFF8080,
@@ -37,13 +38,21 @@ namespace WalsParser {
 		public static Region? FromID(string id){
 			return regions.Find(r => r.id == id);
 		}
-		static readonly Region AFRICA = new("africa", new Province[]{Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN});
-		static readonly Region AMERICA_NORTH = new("america_north", new Province[]{Province.AMERICA_NORTH_NORTH, Province.CARRIBEAN, Province.AMERICA_CENTRAL});
+		static readonly Region AFRICA = new("africa", new Province[]{
+			Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN
+		});
+		static readonly Region AMERICA_NORTH = new("america_north", new Province[]{
+			Province.AMERICA_NORTH_NORTH, Province.CASCADIA, Province.CARRIBEAN, Province.AMERICA_CENTRAL
+		});
 		static readonly Region AMERICA_SOUTH = new("america_south", new Province[]{Province.AMERICA_SOUTH});
-		static readonly Region ASIA = new("asia", new Province[]{Province.SIBERIA, Province.CAUCASUS, Province.ASIA_SOUTHWEST,
-			Province.ASIA_CENTRAL, Province.INDIA, Province.ASIA_EAST, Province.INDOCHINA, Province.INDONESIA});
+		static readonly Region ASIA = new("asia", new Province[]{
+			Province.SIBERIA, Province.CAUCASUS, Province.ASIA_SOUTHWEST,
+			Province.ASIA_CENTRAL, Province.INDIA, Province.ASIA_EAST, Province.INDOCHINA, Province.INDONESIA
+		});
 		static readonly Region EUROPE = new("europe", new Province[]{Province.EUROPE});
-		static readonly Region OCEANIA = new("oceania", new Province[]{Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA});
+		static readonly Region OCEANIA = new("oceania", new Province[]{
+			Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA
+		});
 	}
 	static class Geo {
 		const string MAP_FILENAME = "regions.png";
