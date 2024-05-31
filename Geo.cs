@@ -43,12 +43,8 @@ namespace WalsParser {
 				return Language.languages.Where(l => constituents.Contains(l.province));
 			}
 		}
-		public override string ToString(){
-			return $"<Region {id}>";
-		}
-		public static Region? FromID(string id){
-			return regions.Find(r => r.id == id);
-		}
+		public override string ToString() => $"<Region {id}>";
+		public static Region? FromID(string id) => regions.Find(r => r.id == id);
 		static readonly Region AFRICA = new("AFRICA", new Province[]{
 			Province.AFRICA_NORTH, Province.AFRICA_SUBSAHARAN
 		});

@@ -41,9 +41,7 @@ namespace WalsParser
 					actions[args[i]](args[++i]);
 			}
 		}
-		static long Time(){
-			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
-		}
+		static long Time() => ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
 		public static double Wilson(int n_s, int n){
 			if (n == 0)
 				return 0;
@@ -220,9 +218,7 @@ namespace WalsParser
 			}
 			return 0 < total ? Program.Wilson(matches, total) : 0;
 		}
-		public override string ToString(){
-			return $"<Language '{id}': {name}>";
-		}
+		public override string ToString() => $"<Language '{id}': {name}>";
 		public static Language FromRow(string s){
 			string[] data = s.Split(',');
 			string jsondata, id, name, description, markup_description;
@@ -237,11 +233,7 @@ namespace WalsParser
 			byte.TryParse(data[8], out byte version);
 			return new Language(pk, jsondata, id, name, description, markup_description, latitude, longitude, version);
 		}
-		public static Language? FromID(string id){
-			if (cache.ContainsKey(id))
-				return cache[id];
-			return cache[id] = languages.Find(l => l.id == id);
-		}
+		public static Language? FromID(string id) => cache.ContainsKey(id) ? cache[id] : cache[id] = languages.Find(l => l.id == id);
 	}
 	class Parameter : WalsCSV {
 		public static readonly List<Parameter> parameters = new List<Parameter>();
@@ -257,9 +249,7 @@ namespace WalsParser
 				return (n << 8) + m;
 			}
 		}
-		public override string ToString(){
-			return $"<Feature {id}: {name}>";
-		}
+		public override string ToString() => $"<Feature {id}: {name}>";
 		public static Parameter FromRow(string s){
 			string[] data = s.Split(',');
 			string jsondata, id, name, description, markup_description;
@@ -272,9 +262,7 @@ namespace WalsParser
 			byte.TryParse(data[6], out byte version);
 			return new Parameter(pk, jsondata, id, name, description, markup_description, version);
 		}
-		public static Parameter? FromID(string id){
-			return parameters.Find(p => p.id == id);
-		}
+		public static Parameter? FromID(string id) => parameters.Find(p => p.id == id);
 	}
 	class Value : WalsCSV {
 		public static readonly List<Value> values = new List<Value>();
@@ -316,9 +304,7 @@ namespace WalsParser
 				return Parameter.FromID(id_parameter);
 			}
 		}
-		public override string ToString(){
-			return $"<Value {language} : '{parameter}' : {domainElement}>";
-		}
+		public override string ToString() => $"<Value {language} : '{parameter}' : {domainElement}>";
 		public static Value FromRow(string s){
 			string[] data = s.Split(',');
 			string jsondata, id, name, description, markup_description, frequency, confidence;
@@ -357,12 +343,8 @@ namespace WalsParser
 				return new(c, color);
 			}
 		}
-		public override string ToString(){
-			return $"<{name}>";
-		}
-		public static DomainElement? FromID(short pk){
-			return domainElements.Find(de => de.pk == pk);
-		}
+		public override string ToString() => $"<{name}>";
+		public static DomainElement? FromID(short pk) => domainElements.Find(de => de.pk == pk);
 		public static DomainElement FromRow(string s){
 			string[] data = Regex.Matches(s, Program.CSV_SPLIT_REGEX).Select(match => match.Groups[2].Value).ToArray();
 			string abbr, jsondata, id, name, description, markup_description;
