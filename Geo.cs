@@ -39,9 +39,7 @@ namespace WalsParser {
 			regions.Add(this);
 		}
 		public IEnumerable<Language> languages {
-			get {
-				return Language.languages.Where(l => constituents.Contains(l.province));
-			}
+			get => Language.languages.Where(l => constituents.Contains(l.province));
 		}
 		public override string ToString() => $"<Region {id}>";
 		public static Region? FromID(string id) => regions.Find(r => r.id == id);

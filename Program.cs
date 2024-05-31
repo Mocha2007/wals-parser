@@ -36,10 +36,9 @@ namespace WalsParser
 			return elapsed_ms / completion - elapsed_ms;
 		}
 		static void ParseArgs(string[] args, Dictionary<string, Action<string>> actions){
-			for (int i = 0; i < args.Length; i++){
+			for (int i = 0; i < args.Length; i++)
 				if (actions.ContainsKey(args[i]))
 					actions[args[i]](args[++i]);
-			}
 		}
 		static long Time() => ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
 		public static double Wilson(int n_s, int n){
@@ -185,19 +184,13 @@ namespace WalsParser
 			languages.Add(this);
 		}
 		Value[] values {
-			get {
-				return valueCache ??= Value.values.Where(v => v.id_language == id).ToArray();
-			}
+			get => valueCache ??= Value.values.Where(v => v.id_language == id).ToArray();
 		}
 		Country country {
-			get {
-				return WPImage.CountryFromLatLon(latitude, longitude);
-			}
+			get => WPImage.CountryFromLatLon(latitude, longitude);
 		}
 		public Province province {
-			get {
-				return WPImage.FromLatLon(latitude, longitude);
-			}
+			get => WPImage.FromLatLon(latitude, longitude);
 		}
 		public double Distance(Language other){
 			Value[] values0 = values;
@@ -280,29 +273,19 @@ namespace WalsParser
 			values.Add(this);
 		}
 		public string id_parameter {
-			get {
-				return id.Split('-')[0];
-			}
+			get => id.Split('-')[0];
 		}
 		public string id_language {
-			get {
-				return id.Split('-')[1];
-			}
+			get => id.Split('-')[1];
 		}
 		DomainElement? domainElement {
-			get {
-				return DomainElement.FromID(domainelement_pk);
-			}
+			get => DomainElement.FromID(domainelement_pk);
 		}
 		public Language? language {
-			get {
-				return Language.FromID(id_language);
-			}
+			get => Language.FromID(id_language);
 		}
 		Parameter? parameter {
-			get {
-				return Parameter.FromID(id_parameter);
-			}
+			get => Parameter.FromID(id_parameter);
 		}
 		public override string ToString() => $"<Value {language} : '{parameter}' : {domainElement}>";
 		public static Value FromRow(string s){
