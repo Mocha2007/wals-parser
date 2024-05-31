@@ -44,7 +44,9 @@ namespace WalsParser
 		static long Time(){
 			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
 		}
-		static double Wilson(int n_s, int n){
+		public static double Wilson(int n_s, int n){
+			if (n == 0)
+				return 0;
 			// https://medium.com/tech-that-works/wilson-lower-bound-score-and-bayesian-approximation-for-k-star-scale-rating-to-rate-products-c67ec6e30060
 			double p = (double)n_s / n;
 			// st.norm.ppf(1 - (1 - confidence) / 2) where confidence = 0.95
@@ -209,7 +211,7 @@ namespace WalsParser
 				}
 				catch (InvalidOperationException){}
 			}
-			return 0 < total ? (double)matches / total : 0;
+			return 0 < total ? Program.Wilson(matches, total) : 0;
 		}
 		public override string ToString(){
 			return $"<Language '{id}': {name}>";
