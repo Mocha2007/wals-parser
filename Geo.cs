@@ -7,7 +7,7 @@ namespace WalsParser {
 		BALKANS = 0xFFFF80C0,
 		EUROPE_WEST = 0xFFC0FF80,
 		EUROPE_NORTH = 0xFF80C0FF,
-		CAUCASUS = 0xFF000000,
+		CAUCASUS = 0xFF202020,
 		SIBERIA = 0xFF404040,
 		ASIA_CENTRAL = 0xFF808080,
 		ASIA_EAST = 0xFFC0C0C0,
@@ -29,6 +29,7 @@ namespace WalsParser {
 		MESOAMERICA = 0xFF400080,
 		AMAZON = 0xFF804080,
 		AMERICA_SOUTHWEST = 0xFF804080,
+		UNINHABITED = 0xFF000000,
 	}
 	class Region {
 		public static readonly List<Region> regions = new();
