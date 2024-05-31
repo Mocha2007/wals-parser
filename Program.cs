@@ -203,19 +203,16 @@ namespace WalsParser
 		}
 		public static Language FromRow(string s){
 			string[] data = s.Split(',');
-			short pk;
-			byte version;
 			string jsondata, id, name, description, markup_description;
-			double latitude, longitude;
-			short.TryParse(data[0], out pk);
+			short.TryParse(data[0], out short pk);
 			jsondata = data[1];
 			id = data[2];
 			name = data[3];
 			description = data[4];
 			markup_description = data[5];
-			double.TryParse(data[6], out latitude);
-			double.TryParse(data[7], out longitude);
-			byte.TryParse(data[8], out version);
+			double.TryParse(data[6], out double latitude);
+			double.TryParse(data[7], out double longitude);
+			byte.TryParse(data[8], out byte version);
 			return new Language(pk, jsondata, id, name, description, markup_description, latitude, longitude, version);
 		}
 		public static Language? FromID(string id){
@@ -233,8 +230,7 @@ namespace WalsParser
 		public int order {
 			get {
 				string[] halves = Regex.Split(id, "(?=[A-Z])");
-				byte n;
-				byte.TryParse(halves[0], out n);
+				byte.TryParse(halves[0], out byte n);
 				byte m = (byte)halves[1][0];
 				return (n << 8) + m;
 			}
@@ -244,16 +240,14 @@ namespace WalsParser
 		}
 		public static Parameter FromRow(string s){
 			string[] data = s.Split(',');
-			short pk;
-			byte version;
 			string jsondata, id, name, description, markup_description;
-			short.TryParse(data[0], out pk);
+			short.TryParse(data[0], out short pk);
 			jsondata = data[1];
 			id = data[2];
 			name = data[3];
 			description = data[4];
 			markup_description = data[5];
-			byte.TryParse(data[6], out version);
+			byte.TryParse(data[6], out byte version);
 			return new Parameter(pk, jsondata, id, name, description, markup_description, version);
 		}
 		public static Parameter? FromID(string id){
@@ -304,20 +298,18 @@ namespace WalsParser
 		}
 		public static Value FromRow(string s){
 			string[] data = s.Split(',');
-			short pk, valueset_pk, domainelement_pk;
-			byte version;
 			string jsondata, id, name, description, markup_description, frequency, confidence;
 			jsondata = data[0];
 			id = data[1];
 			name = data[2];
 			description = data[3];
 			markup_description = data[4];
-			short.TryParse(data[5], out pk);
-			short.TryParse(data[6], out valueset_pk);
-			short.TryParse(data[7], out domainelement_pk);
+			short.TryParse(data[5], out short pk);
+			short.TryParse(data[6], out short valueset_pk);
+			short.TryParse(data[7], out short domainelement_pk);
 			frequency = data[8];
 			confidence = data[9];
-			byte.TryParse(data[10], out version);
+			byte.TryParse(data[10], out byte version);
 			return new Value(jsondata, id, name, description, markup_description,
 				pk, valueset_pk, domainelement_pk, frequency, confidence, version);
 		}
@@ -350,19 +342,17 @@ namespace WalsParser
 		}
 		public static DomainElement FromRow(string s){
 			string[] data = Regex.Matches(s, Program.CSV_SPLIT_REGEX).Select(match => match.Groups[2].Value).ToArray();
-			short pk, parameter_pk, number;
-			byte version;
 			string abbr, jsondata, id, name, description, markup_description;
-			short.TryParse(data[0], out pk);
+			short.TryParse(data[0], out short pk);
 			jsondata = data[1];
 			id = data[2];
 			name = data[3];
 			description = data[4];
 			markup_description = data[5];
-			short.TryParse(data[6], out parameter_pk);
-			short.TryParse(data[7], out number);
+			short.TryParse(data[6], out short parameter_pk);
+			short.TryParse(data[7], out short number);
 			abbr = data[8];
-			byte.TryParse(data[9], out version);
+			byte.TryParse(data[9], out byte version);
 			return new DomainElement(pk, jsondata, id, name, description, markup_description, parameter_pk, number, abbr, version);
 		}
 	}
