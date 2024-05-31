@@ -40,6 +40,11 @@ namespace WalsParser {
 			this.constituents = constituents;
 			regions.Add(this);
 		}
+		public IEnumerable<Language> languages {
+			get {
+				return Language.languages.Where(l => constituents.Contains(l.province));
+			}
+		}
 		public override string ToString(){
 			return $"<Region {id}>";
 		}

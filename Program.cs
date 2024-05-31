@@ -14,7 +14,8 @@ namespace WalsParser
 		const string VALUE_FILENAME = "../wals/raw/value.csv";
 		static readonly Dictionary<string, Action<string>> arg_actions = new Dictionary<string, Action<string>>(){
 			{"dist", TestLangDist},
-			{"sprachbund", TestRegion},
+			{"sprachbund", s => TestRegion(s)},
+			{"typicality", TypicalRegionLang},
 		};
 		static void Main(string[] args){
 			Load();
@@ -65,9 +66,9 @@ namespace WalsParser
 			// Debug($"{Time() - t_start} ms");
 			// region printing
 			foreach (Region region in Region.regions)
-				Debug($"{region} has {Language.GetIn(region).ToArray().Length} languages.");
+				Debug($"{region} has {region.languages.ToArray().Length} languages.");
 		}
-		static void TestRegion(string id = region_id){
+		static DomainElement[] TestRegion(string id = region_id){
 			Region region = Region.FromID(id) ?? Region.regions[0];
 			// list parameter majorities...
 			Dictionary<short, int> counts = new Dictionary<short, int>();
@@ -77,6 +78,7 @@ namespace WalsParser
 					return l is not null && region.constituents.Contains(l.province);
 				})
 				.ToList();
+			List<DomainElement?> domainElements = new();
 			foreach (Parameter p in Parameter.parameters.OrderBy(p => p.order)){
 				// find valid values
 				IEnumerable<Value> values = valuePopulation.Where(v => v.id_parameter == p.id);
@@ -95,11 +97,31 @@ namespace WalsParser
 						majority_domainelement_pk = domainelement_pk;
 						break;
 					}
-				if (0 <= majority_domainelement_pk)
-					Debug($"{p} => {DomainElement.FromID(majority_domainelement_pk)} ({counts[majority_domainelement_pk]}/{sampleSize})");
+				if (0 <= majority_domainelement_pk){
+					DomainElement? d = DomainElement.FromID(majority_domainelement_pk);
+					domainElements.Add(d);
+					Debug($"{p} => {d} ({counts[majority_domainelement_pk]}/{sampleSize})");
+				}
 				else
 					Debug($"{p} => no majority");
 			}
+			return domainElements.OfType<DomainElement>().ToArray();
+		}
+		static void TypicalRegionLang(string id = region_id){
+			DomainElement[] domainElements = TestRegion(id);
+			short[] depks = domainElements.Select(de => de.pk).ToArray();
+			Language[] languages = (Region.FromID(id) ?? Region.EARTH).languages.ToArray();
+			List<string> lids = languages.Select(l => l.id).ToList();
+			int[] scores = new int[languages.Length];
+			Value[] values = Value.values.Where(v => depks.Contains(v.domainelement_pk) && lids.Contains(v.id_language)).ToArray();
+			for (int i = 0; i < values.Length; i++){
+				Value v = values[i];
+				int j = lids.IndexOf(v.id_language);
+				scores[j]++;
+			}
+			// print results
+			for (int i = 0; i < languages.Length; i++)
+				Debug($"{scores[i]} <= {languages[i]}");
 		}
 		static void TestLangDist(string id = test_lang_id){
 			Debug("Testing lang dist...");
@@ -108,7 +130,7 @@ namespace WalsParser
 			List<Tuple<Language, double>> distances = new();
 			int i = 0;
 			long t_start = Time();
-			Language[] population = Language.languages.Where(l => Region.EARTH.constituents.Contains(l.province)).ToArray();
+			Language[] population = Region.EARTH.languages.ToArray();
 			foreach (Language l in population){
 				Tuple<Language, double> t = new(l, ref_lang.Distance(l));
 				distances.Add(t);
@@ -195,9 +217,6 @@ namespace WalsParser
 			double.TryParse(data[7], out longitude);
 			byte.TryParse(data[8], out version);
 			return new Language(pk, jsondata, id, name, description, markup_description, latitude, longitude, version);
-		}
-		public static IEnumerable<Language> GetIn(Region region){
-			return languages.Where(l => region.constituents.Contains(l.province));
 		}
 		public static Language? FromID(string id){
 			if (cache.ContainsKey(id))
