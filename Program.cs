@@ -25,12 +25,7 @@ namespace WalsParser
 			// await input
 			Console.ReadLine();
 		}
-		static void ParseArgs(string[] args, Dictionary<string, Action<string>> actions){
-			for (int i = 0; i < args.Length; i++){
-				if (actions.ContainsKey(args[i]))
-					actions[args[i]](args[++i]);
-			}
-		}
+		// little functions
 		public static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write("[DEBUG] ");
@@ -40,9 +35,23 @@ namespace WalsParser
 		static double ETA(long elapsed_ms, double completion){
 			return elapsed_ms / completion - elapsed_ms;
 		}
+		static void ParseArgs(string[] args, Dictionary<string, Action<string>> actions){
+			for (int i = 0; i < args.Length; i++){
+				if (actions.ContainsKey(args[i]))
+					actions[args[i]](args[++i]);
+			}
+		}
 		static long Time(){
 			return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
 		}
+		static double Wilson(int n_s, int n){
+			// https://medium.com/tech-that-works/wilson-lower-bound-score-and-bayesian-approximation-for-k-star-scale-rating-to-rate-products-c67ec6e30060
+			double p = (double)n_s / n;
+			// st.norm.ppf(1 - (1 - confidence) / 2) where confidence = 0.95
+			const double z = 1.959963984540054;
+			return (p + z * z / (2 * n) - z * Math.Sqrt((p * (1 - p) + z * z / (4 * n)) / n)) / (1 + z * z / n);
+		}
+		// big functions
 		static void Load(){
 			// long t_start = Time();
 			// create a new region for each province
@@ -113,15 +122,18 @@ namespace WalsParser
 			Language[] languages = (Region.FromID(id) ?? Region.EARTH).languages.ToArray();
 			List<string> lids = languages.Select(l => l.id).ToList();
 			int[] scores = new int[languages.Length];
-			Value[] values = Value.values.Where(v => depks.Contains(v.domainelement_pk) && lids.Contains(v.id_language)).ToArray();
+			int[] totals = new int[languages.Length];
+			Value[] values = Value.values.Where(v => lids.Contains(v.id_language)).ToArray();
 			for (int i = 0; i < values.Length; i++){
 				Value v = values[i];
 				int j = lids.IndexOf(v.id_language);
-				scores[j]++;
+				totals[j]++;
+				if (depks.Contains(v.domainelement_pk))
+					scores[j]++;
 			}
 			// print results
 			for (int i = 0; i < languages.Length; i++)
-				Debug($"{scores[i]} <= {languages[i]}");
+				Debug($"Score: {Math.Round(100*Wilson(scores[i], totals[i]), 2)}% ({scores[i]}/{totals[i]}) <= {languages[i].name}");
 		}
 		static void TestLangDist(string id = test_lang_id){
 			Debug("Testing lang dist...");
