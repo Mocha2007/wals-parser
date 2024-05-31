@@ -77,4 +77,24 @@ namespace WalsParser {
 		static readonly Region OLDWORLD = new("WORLD_OLD", AFROEURASIA.constituents.Concat(OCEANIA.constituents).ToArray());
 		static readonly Region AMERICAS = new("AMERICAS", AMERICA_NORTH.constituents.Concat(AMERICA_SOUTH.constituents).ToArray());
 	}
+	class Country {
+		const string COUNTRY_DATA_FILENAME = "color_country.dat";
+		static readonly List<Country> countries = new();
+		static readonly Country NULL = new("NULL", 0);
+		readonly string name;
+		readonly uint color;
+		Country(string name, uint color){
+			this.name = name;
+			this.color = color;
+			countries.Add(this);
+		}
+		public static explicit operator Country(uint x) => countries.Find(c => c.color == x) ?? NULL;
+		static Country? FromName(string name) => countries.Find(c => c.name == name);
+		public static void Load(){
+			foreach (string row in File.ReadAllLines(COUNTRY_DATA_FILENAME)){
+				string[] args = row.Split('\t');
+				new Country(args[1], Convert.ToUInt32("FF" + args[0], 16));
+			}
+		}
+	}
 }

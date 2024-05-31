@@ -56,6 +56,8 @@ namespace WalsParser
 		// big functions
 		static void Load(){
 			// long t_start = Time();
+			// load countries
+			Country.Load();
 			// create a new region for each province
 			foreach (Province province in Enum.GetValues<Province>())
 				new Region(province.ToString(), new Province[]{province});
@@ -187,6 +189,11 @@ namespace WalsParser
 		Value[] values {
 			get {
 				return valueCache ??= Value.values.Where(v => v.id_language == id).ToArray();
+			}
+		}
+		Country country {
+			get {
+				return WPImage.CountryFromLatLon(latitude, longitude);
 			}
 		}
 		public Province province {
