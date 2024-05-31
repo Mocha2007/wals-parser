@@ -32,9 +32,7 @@ namespace WalsParser
 			Console.ForegroundColor = ConsoleColor.Gray;
 			Console.WriteLine(o);
 		}
-		static double ETA(long elapsed_ms, double completion){
-			return elapsed_ms / completion - elapsed_ms;
-		}
+		static double ETA(long elapsed_ms, double completion) => elapsed_ms / completion - elapsed_ms;
 		static void ParseArgs(string[] args, Dictionary<string, Action<string>> actions){
 			for (int i = 0; i < args.Length; i++)
 				if (actions.ContainsKey(args[i]))
