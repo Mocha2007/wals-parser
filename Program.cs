@@ -26,7 +26,7 @@ namespace WalsParser
 			Console.ReadLine();
 		}
 		// little functions
-		public static void Debug(object o){
+		static void Debug(object o){
 			Console.ForegroundColor = ConsoleColor.DarkYellow;
 			Console.Write("[DEBUG] ");
 			Console.ForegroundColor = ConsoleColor.Gray;
@@ -157,7 +157,8 @@ namespace WalsParser
 	abstract class WalsCSV {
 		public readonly short pk;
 		readonly byte version;
-		public readonly string jsondata, id, name, description, markup_description;
+		public readonly string jsondata, id, name;
+		readonly string description, markup_description;
 		public WalsCSV(short pk, string jsondata, string id, string name,
 				string description, string markup_description, byte version){
 			this.pk = pk;
@@ -181,7 +182,7 @@ namespace WalsParser
 			this.longitude = longitude;
 			languages.Add(this);
 		}
-		public Value[] values {
+		Value[] values {
 			get {
 				return valueCache ??= Value.values.Where(v => v.id_language == id).ToArray();
 			}
@@ -268,7 +269,8 @@ namespace WalsParser
 	}
 	class Value : WalsCSV {
 		public static readonly List<Value> values = new List<Value>();
-		public readonly short valueset_pk, domainelement_pk;
+		public readonly short domainelement_pk;
+		readonly short valueset_pk;
 		readonly string frequency, confidence;
 		Value(string jsondata, string id, string name, string description,
 				string markup_description, short pk, short valueset_pk,
@@ -290,7 +292,7 @@ namespace WalsParser
 				return id.Split('-')[1];
 			}
 		}
-		public DomainElement? domainElement {
+		DomainElement? domainElement {
 			get {
 				return DomainElement.FromID(domainelement_pk);
 			}
@@ -300,7 +302,7 @@ namespace WalsParser
 				return Language.FromID(id_language);
 			}
 		}
-		public Parameter? parameter {
+		Parameter? parameter {
 			get {
 				return Parameter.FromID(id_parameter);
 			}
