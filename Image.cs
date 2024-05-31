@@ -1,15 +1,16 @@
-using System.Drawing;
+using SkiaSharp;
 
 // image handling
 namespace WalsParser {
 	static class WPImage {
 		const string MAP_FILENAME = "regions.png";
-		static readonly Bitmap map = new(MAP_FILENAME);
+		// https://stackoverflow.com/a/65820579/2579798
+		static readonly SKBitmap map = SKBitmap.FromImage(SKImage.FromEncodedData(MAP_FILENAME));
 		static readonly int height = map.Height;
 		static readonly int width = map.Width;
 		public static Province FromLatLon(double lat, double lon){
 			Tuple<int, int> coords = LatLonToXY(lat, lon);
-			uint answer = (uint)map.GetPixel(coords.Item1, coords.Item2).ToArgb();
+			uint answer = (uint)map.GetPixel(coords.Item1, coords.Item2);
 			return (Province)answer;
 		}
 		static Tuple<int, int> LatLonToXY(double lat, double lon){
