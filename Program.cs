@@ -188,7 +188,7 @@ namespace WalsParser
 		}
 		public Province province {
 			get {
-				return Geo.FromLatLon(latitude, longitude);
+				return WPImage.FromLatLon(latitude, longitude);
 			}
 		}
 		public double Distance(Language other){
