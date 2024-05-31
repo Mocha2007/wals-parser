@@ -73,6 +73,11 @@ namespace WalsParser {
 			Province.AUSTRALIA, Province.NEW_GUINEA, Province.OCEANIA
 		});
 		public static Region EARTH = regions[0]; // placeholder
+		// groups
+		static readonly Region EURASIA = new("EURASIA", EUROPE.constituents.Concat(ASIA.constituents).ToArray());
+		static readonly Region AFROEURASIA = new("AFRO-EURASIA", EURASIA.constituents.Concat(AFRICA.constituents).ToArray());
+		static readonly Region OLDWORLD = new("WORLD_OLD", AFROEURASIA.constituents.Concat(OCEANIA.constituents).ToArray());
+		static readonly Region AMERICAS = new("AMERICAS", AMERICA_NORTH.constituents.Concat(AMERICA_SOUTH.constituents).ToArray());
 	}
 	static class Geo {
 		const string MAP_FILENAME = "regions.png";
